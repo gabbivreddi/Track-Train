@@ -13,10 +13,6 @@ struct ContentView: View {
     // State to hold all exercises, potentially loaded from CoreData or elsewhere in a real app.
     // For now, using the sampleExercises global constant.
     @State private var exercises: [Exercise] = sampleExercises
-    
-    // State to hold all created routines.
-    // In a real app, you'd persist this data (e.g., using CoreData or UserDefaults with Codable).
-    @State private var routines: [Routine] = [] // Start with an empty list of routines
 
     @State private var selectedTab: Tab = .home
 
@@ -39,11 +35,11 @@ struct ContentView: View {
                         }
 
                     // HomeView will now be displayed for the home tab
-                    HomeView()
-                        .tag(Tab.home)
-                        .tabItem {
-                            Label("Home", systemImage: "house.fill")
-                        }
+                    Text("Home Screen Content")
+                                            .tag(Tab.home)
+                                            .tabItem {
+                                                Label("Home", systemImage: "house.fill")
+                                            }
 
                     // ExercisesListView is now used for the exercises tab
                     ExercisesListView(exercises: $exercises) // Pass the binding if ExercisesListView modifies it
