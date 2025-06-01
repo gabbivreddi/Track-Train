@@ -14,16 +14,22 @@ import SwiftUI
 
 struct ContentView: View {
     // State to hold all exercises.
+    // For now, using the sampleExercises global constant.
+    // If exercises were also user-editable and needed persistence,
+    // they would also be loaded/saved via DataManager.
     @State private var exercises: [Exercise] = sampleExercises
 
-    // State to hold all routines.
-    @State private var routines: [Routine] = [] // Initialize with an empty array
+    // State to hold all routines. Now loaded from DataManager.
+    @State private var routines: [Routine] = []
 
     @State private var selectedTab: Tab = .home
 
     // State to control the presentation of sheets
     @State private var showingCreateRoutineSheet = false
     @State private var showingPickRoutineSheet = false
+    
+    // Access to the DataManager
+    private let dataManager = DataManager.shared
 
     // Enum to represent the different tabs
     enum Tab {
@@ -40,7 +46,7 @@ struct ContentView: View {
                 }
 
             // Home tab with routine management
-            NavigationView { // Added NavigationView for Home tab for titles and buttons
+            NavigationView {
                 VStack(spacing: 20) {
                     Text("Manage Your Routines")
                         .font(.title2)
@@ -72,7 +78,7 @@ struct ContentView: View {
                     
                     Spacer() // Pushes buttons up
                 }
-                .navigationTitle("Home") // Title for the Home tab's NavigationView
+                .navigationTitle("Home")
             }
             .tag(Tab.home)
             .tabItem {
@@ -83,8 +89,6 @@ struct ContentView: View {
                 CreateRoutineView(routines: $routines, allExercises: exercises)
             }
             // Sheet for picking an existing routine
-            // Note: The showingCreateRoutineSheet binding is passed to PickRoutineView
-            // so it can trigger the CreateRoutineView from there.
             .sheet(isPresented: $showingPickRoutineSheet) {
                 PickRoutineView(routines: $routines, showingCreateRoutineSheet: $showingCreateRoutineSheet)
             }
@@ -104,9 +108,16 @@ struct ContentView: View {
                     Label("Profile", systemImage: "person.crop.circle.fill")
                 }
         }
-        .accentColor(.blue) // Customize the selected tab item color
-        
-        // You might want to load/save routines here, e.g., in .onAppear / .onChange
-        // For now, routines are in-memory.
+        .accentColor(.blue)
+        .onAppear {
+            // Load routines when the ContentView first appears
+            self.routines = dataManager.loadRoutines()
+            print("ContentView appeared, loaded \(self.routines.count) routines.")
+        }
+        .onChange(of: routines) { newRoutines in
+            // Save routines whenever the routines array changes
+            dataManager.saveRoutines(newRoutines)
+            print("Routines array changed, saved \(newRoutines.count) routines.")
+        }
     }
 }
